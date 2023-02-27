@@ -791,6 +791,20 @@ def set_socket(
     sock.set_interface(iface)
 
 
+def _auto_init():
+    global _default_session
+    if _default_session is None:
+        try:
+            import wifi
+            import socketpool
+            import ssl
+
+            pool = socketpool.SocketPool(wifi.radio)
+            _default_session = Session(pool, ssl.create_default_context())
+        except ImportError:
+            raise RuntimeError("The module could not be automatically configured")
+
+
 def request(
     method: str,
     url: str,
@@ -801,6 +815,7 @@ def request(
     timeout: float = 1,
 ) -> None:
     """Send HTTP request"""
+    _auto_init()
     # pylint: disable=too-many-arguments
     _default_session.request(
         method,
@@ -815,29 +830,35 @@ def request(
 
 def head(url: str, **kw):
     """Send HTTP HEAD request"""
+    _auto_init()
     return _default_session.request("HEAD", url, **kw)
 
 
 def get(url: str, **kw):
     """Send HTTP GET request"""
+    _auto_init()
     return _default_session.request("GET", url, **kw)
 
 
 def post(url: str, **kw):
     """Send HTTP POST request"""
+    _auto_init()
     return _default_session.request("POST", url, **kw)
 
 
 def put(url: str, **kw):
     """Send HTTP PUT request"""
+    _auto_init()
     return _default_session.request("PUT", url, **kw)
 
 
 def patch(url: str, **kw):
     """Send HTTP PATCH request"""
+    _auto_init()
     return _default_session.request("PATCH", url, **kw)
 
 
 def delete(url: str, **kw):
     """Send HTTP DELETE request"""
+    _auto_init()
     return _default_session.request("DELETE", url, **kw)
